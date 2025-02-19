@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Inserisci Parametri</title>
+    <script>
+      function saveAndRun() {
+        const email = document.getElementById('email').value;
+        const folderUrl = document.getElementById('folderUrl').value;
+
+        if (!email || !folderUrl) {
+          alert('Inserisci sia l\'email che l\'URL della cartella.');
+          return;
+        }
+
+        // 🔹 Apri una finestra temporanea in attesa dei risultati
+        var resultWindow = window.open("", "_blank");
+
+        if (!resultWindow) {
+          alert("⚠ Il browser ha bloccato l'apertura della finestra. Sblocca i pop-up e riprova.");
+          return;
+        }
+
+        resultWindow.document.write("<html><head><title>Risultati Ricerca</title></head><body><h2>⏳ Ricerca in corso...</h2></body></html>");
+        resultWindow.document.close();
+
+        google.script.run.saveParameters(email, folderUrl);
+
+        google.script.run
+          .withSuccessHandler((htmlOutput) => {
+            resultWindow.document.open();
+            resultWindow.document.write(htmlOutput);
+            resultWindow.document.close();
+            resultWindow.focus(); // 🔹 Porta la finestra in primo piano
+          })
+          .getResultsPage(email, folderUrl);
+      }
+
+      function loadPreviousParameters() {
+        google.script.run
+          .withSuccessHandler((params) => {
+            document.getElementById('email').value = params.email || '';
+            document.getElementById('folderUrl').value = params.folderUrl || '';
+          })
+          .getParameters();
+      }
+    </script>
+  </head>
+  <body onload="loadPreviousParameters()">
+    <h2>Inserisci Parametri</h2>
+    <form>
+      <label for="email">Email:</label><br>
+      <input type="text" id="email" name="email" style="width: 100%;" placeholder="Inserisci email"><br><br>
+      <label for="folderUrl">URL Cartella:</label><br>
+      <input type="text" id="folderUrl" name="folderUrl" style="width: 100%;" placeholder="Inserisci URL"><br><br>
+      <button type="button" onclick="saveAndRun()">Salva e Avvia</button>
+    </form>
+  </body>
+</html>
+

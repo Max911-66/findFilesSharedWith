@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Risultati Ricerca</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+      cursor: pointer;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script>
+    function filterResults() {
+      var input = document.getElementById('searchInput').value.toLowerCase();
+      var rows = document.getElementsByTagName('tr');
+      for (var i = 1; i < rows.length; i++) {
+        var cell = rows[i].getElementsByTagName('td')[0];
+        if (cell) {
+          var textValue = cell.textContent || cell.innerText;
+          rows[i].style.display = textValue.toLowerCase().includes(input) ? '' : 'none';
+        }
+      }
+    }
+
+    function openInputDialog() {
+      google.script.run.showInputDialog();
+    }
+  </script>
+</head>
+
+<body>
+  <h2>📂 File condivisi con <b><?= email ?></b></h2>
+  <input type="text" id="searchInput" onkeyup="filterResults()" placeholder="🔎 Cerca file...">
+
+  <? if (sharedFiles.length === 0) { ?>
+  <p>⚠ Nessun file condiviso trovato.</p>
+  <? } else { ?>
+  <table>
+    <tr>
+      <th>📄 File</th>
+      <th>🔗 Link</th>
+    </tr>
+    <? for (var i = 0; i < sharedFiles.length; i++) { ?>
+    <tr>
+      <td>
+        <?= sharedFiles[i].name ?>
+      </td>
+      <td><a href="<?= sharedFiles[i].link ?>" target="_blank">Apri</a></td>
+    </tr>
+    <? } ?>
+  </table>
+  <? } ?>
+
+  <button onclick="openInputForm()">🔄 Nuova Ricerca</button>
+
+  <script>
+    function openInputForm() {
+    // Chiude la scheda attuale
+    window.open('', '_self').close();
+
+    // Recupera l'URL della Web App pubblicata e apre una nuova scheda
+    google.script.run.withSuccessHandler(function(url) {
+      if (url) {
+        window.open(url, '_blank');
+      } else {
+        alert("Errore: impossibile ottenere l'URL della Web App.");
+      }
+    }).getWebAppExecUrl();
+  }
+  </script>
+
+</body>
+
+</html>
