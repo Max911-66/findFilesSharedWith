@@ -1,57 +1,21 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="it">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Risultati Ricerca</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-
-    h2 {
-      color: #333;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th,
-    td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f4f4f4;
-      cursor: pointer;
-    }
-
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+    .container { max-width: 900px; background: white; padding: 20px; margin: auto; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+    h2 { color: #007bff; text-align: center; }
+    input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background-color: #007bff; color: white; cursor: pointer; }
+    tr:hover { background-color: #f1f1f1; }
+    .button-container { text-align: center; margin-top: 20px; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; }
+    button:hover { background-color: #0056b3; }
   </style>
   <script>
     function filterResults() {
@@ -65,54 +29,34 @@
         }
       }
     }
-
+    
     function openInputDialog() {
-      google.script.run.showInputDialog();
+      google.script.run.openInputDialog();
     }
   </script>
 </head>
-
 <body>
-  <h2>📂 File condivisi con <b><?= email ?></b></h2>
-  <input type="text" id="searchInput" onkeyup="filterResults()" placeholder="🔎 Cerca file...">
+  <div class="container">
+    <h2>📂 File condivisi con <b><?= email ?></b></h2>
+    <input type="text" id="searchInput" onkeyup="filterResults()" placeholder="🔎 Cerca file...">
 
-  <? if (sharedFiles.length === 0) { ?>
-  <p>⚠ Nessun file condiviso trovato.</p>
-  <? } else { ?>
-  <table>
-    <tr>
-      <th>📄 File</th>
-      <th>🔗 Link</th>
-    </tr>
-    <? for (var i = 0; i < sharedFiles.length; i++) { ?>
-    <tr>
-      <td>
-        <?= sharedFiles[i].name ?>
-      </td>
-      <td><a href="<?= sharedFiles[i].link ?>" target="_blank">Apri</a></td>
-    </tr>
+    <? if (sharedFiles.length === 0) { ?>
+      <p style="text-align: center; color: red;">⚠ Nessun file condiviso trovato.</p>
+    <? } else { ?>
+      <table>
+        <tr><th>📄 File</th><th>🔗 Link</th></tr>
+        <? for (var i = 0; i < sharedFiles.length; i++) { ?>
+          <tr>
+            <td><?= sharedFiles[i].name ?></td>
+            <td><a href="<?= sharedFiles[i].link ?>" target="_blank">Apri</a></td>
+          </tr>
+        <? } ?>
+      </table>
     <? } ?>
-  </table>
-  <? } ?>
 
-  <button onclick="openInputForm()">🔄 Nuova Ricerca</button>
-
-  <script>
-    function openInputForm() {
-    // Chiude la scheda attuale
-    window.open('', '_self').close();
-
-    // Recupera l'URL della Web App pubblicata e apre una nuova scheda
-    google.script.run.withSuccessHandler(function(url) {
-      if (url) {
-        window.open(url, '_blank');
-      } else {
-        alert("Errore: impossibile ottenere l'URL della Web App.");
-      }
-    }).getWebAppExecUrl();
-  }
-  </script>
-
+    <div class="button-container">
+      <button onclick="openInputDialog()">🔄 Nuova Ricerca</button>
+    </div>
+  </div>
 </body>
-
 </html>
