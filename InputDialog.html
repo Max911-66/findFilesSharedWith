@@ -6,10 +6,20 @@
     <script>
       let pickerApiLoaded = false;
       let oauthToken = null;
+      let config = {};
 
       function onApiLoad() {
-        gapi.load('auth', { 'callback': onAuthApiLoad });
-        gapi.load('picker', { 'callback': function() { pickerApiLoaded = true; } });
+        gapi.load('auth2', function() {
+            gapi.auth2.init({client_id: config.CLIENT_ID});
+        });
+        
+        gapi.load('picker', function() {
+            pickerApiLoaded = true;
+        });
+
+        google.script.run.withSuccessHandler((cfg) => {
+            config = cfg;
+        }).getPickerConfig();
       }
 
       function onAuthApiLoad() {
@@ -21,7 +31,7 @@
       }
 
       function openFolderPicker() {
-        if (!pickerApiLoaded || !oauthToken) {
+        if (!pickerApiLoaded || !oauthToken || !config.DEVELOPER_KEY) {
           alert("⚠ Attendere il caricamento dell'API o effettuare l'accesso.");
           return;
         }
@@ -32,7 +42,7 @@
           .setMimeTypes("application/vnd.google-apps.folder");
 
         const picker = new google.picker.PickerBuilder()
-          .setDeveloperKey("AIzaSyDhv0r-LQTELQKDThW-I8lY1qEn5hPAnNs")
+          .setDeveloperKey(config.DEVELOPER_KEY)
           .setOAuthToken(oauthToken)
           .addView(view)
           .setCallback(folderSelected)

@@ -245,3 +245,11 @@ function getOAuthToken() {
   Logger.log("OAuth Token: " + token); // 🔹 Controlla nei log
   return token;
 }
+
+function getPickerConfig() {
+  return {
+      DEVELOPER_KEY: PropertiesService.getScriptProperties().getProperty("DEVELOPER_KEY"),
+      CLIENT_ID: PropertiesService.getScriptProperties().getProperty("CLIENT_ID"),
+      APP_ID: PropertiesService.getScriptProperties().getProperty("APP_ID")
+  };
+}
