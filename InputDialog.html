@@ -11,10 +11,18 @@
 
       function onApiLoad() {
         google.script.run.withSuccessHandler((cfg) => {
+            if (!cfg.CLIENT_ID) {
+                console.error("❌ Errore: CLIENT_ID non ricevuto da Apps Script.");
+                return;
+            }
             config = cfg;
             console.log("✅ Configurazione caricata:", config);
             
             gapi.load('auth2', function() {
+                if (!config.CLIENT_ID) {
+                    console.error("❌ CLIENT_ID mancante, impossibile inizializzare auth2.");
+                    return;
+                }
                 gapi.auth2.init({client_id: config.CLIENT_ID}).then(() => {
                     auth2Loaded = true;
                     console.log("✅ Google Auth2 caricato");
