@@ -2,58 +2,86 @@
 <html>
   <head>
     <title>Inserisci Parametri</title>
+    <script src="https://apis.google.com/js/api.js"></script>
     <script>
+      let pickerApiLoaded = false;
+      let oauthToken = null;
+
+      function onApiLoad() {
+        gapi.load('auth', { 'callback': onAuthApiLoad });
+        gapi.load('picker', { 'callback': function() { pickerApiLoaded = true; } });
+      }
+
+      function onAuthApiLoad() {
+        google.script.run
+          .withSuccessHandler((token) => {
+            oauthToken = token;
+          })
+          .getOAuthToken();
+      }
+
+      function openFolderPicker() {
+        if (!pickerApiLoaded || !oauthToken) {
+          alert("⚠ Attendere il caricamento dell'API o effettuare l'accesso.");
+          return;
+        }
+
+        const view = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+          .setSelectFolderEnabled(true)
+          .setIncludeFolders(true)
+          .setMimeTypes("application/vnd.google-apps.folder");
+
+        const picker = new google.picker.PickerBuilder()
+          .setDeveloperKey("INSERISCI_LA_TUA_CHIAVE_API")
+          .setOAuthToken(oauthToken)
+          .addView(view)
+          .setCallback(folderSelected)
+          .build();
+
+        picker.setVisible(true);
+      }
+
+      function folderSelected(data) {
+        if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
+          const folder = data[google.picker.Response.DOCUMENTS][0];
+          document.getElementById("folderUrl").value = folder.id; // Salviamo solo l'ID
+          document.getElementById("folderName").innerText = "📁 Selezionato: " + folder.name;
+        }
+      }
+
       function saveAndRun() {
         const email = document.getElementById('email').value;
-        const folderUrl = document.getElementById('folderUrl').value;
+        const folderId = document.getElementById('folderUrl').value;
 
-        if (!email || !folderUrl) {
-          alert('Inserisci sia l\'email che l\'URL della cartella.');
+        if (!email || !folderId) {
+          alert("⚠ Inserisci un'email e seleziona una cartella.");
           return;
         }
 
-        // 🔹 Apri una finestra temporanea in attesa dei risultati
-        var resultWindow = window.open("", "_blank");
-
-        if (!resultWindow) {
-          alert("⚠ Il browser ha bloccato l'apertura della finestra. Sblocca i pop-up e riprova.");
-          return;
-        }
-
-        resultWindow.document.write("<html><head><title>Risultati Ricerca</title></head><body><h2>⏳ Ricerca in corso...</h2></body></html>");
-        resultWindow.document.close();
-
-        google.script.run.saveParameters(email, folderUrl);
-
-        google.script.run
-          .withSuccessHandler((htmlOutput) => {
-            resultWindow.document.open();
-            resultWindow.document.write(htmlOutput);
-            resultWindow.document.close();
-            resultWindow.focus(); // 🔹 Porta la finestra in primo piano
-          })
-          .getResultsPage(email, folderUrl);
+        google.script.run.saveParameters(email, folderId);
+        google.script.run.getResultsPage(email, folderId);
       }
 
       function loadPreviousParameters() {
         google.script.run
           .withSuccessHandler((params) => {
             document.getElementById('email').value = params.email || '';
-            document.getElementById('folderUrl').value = params.folderUrl || '';
+            document.getElementById('folderUrl').value = params.folderId || '';
           })
           .getParameters();
       }
     </script>
   </head>
-  <body onload="loadPreviousParameters()">
+  <body onload="onApiLoad(); loadPreviousParameters();">
     <h2>Inserisci Parametri</h2>
     <form>
       <label for="email">Email:</label><br>
       <input type="text" id="email" name="email" style="width: 100%;" placeholder="Inserisci email"><br><br>
-      <label for="folderUrl">URL Cartella:</label><br>
-      <input type="text" id="folderUrl" name="folderUrl" style="width: 100%;" placeholder="Inserisci URL"><br><br>
+      <label for="folderUrl">Cartella:</label><br>
+      <button type="button" onclick="openFolderPicker()">📂 Seleziona Cartella</button>
+      <span id="folderName" style="margin-left: 10px;"></span>
+      <input type="hidden" id="folderUrl" name="folderUrl"><br><br>
       <button type="button" onclick="saveAndRun()">Salva e Avvia</button>
     </form>
   </body>
 </html>
-
