@@ -12,14 +12,17 @@
       function onApiLoad() {
         google.script.run.withSuccessHandler((cfg) => {
             config = cfg;
+            console.log("✅ Configurazione caricata:", config);
             gapi.load('auth2', function() {
                 gapi.auth2.init({client_id: config.CLIENT_ID}).then(() => {
                     auth2Loaded = true;
+                    console.log("✅ Google Auth2 caricato");
                     signInUser();
                 });
             });
             gapi.load('picker', function() {
                 pickerApiLoaded = true;
+                console.log("✅ Google Picker API caricata");
             });
         }).getPickerConfig();
       }
@@ -29,15 +32,27 @@
           let authInstance = gapi.auth2.getAuthInstance();
           authInstance.signIn().then(user => {
               oauthToken = user.getAuthResponse().access_token;
+              console.log("✅ Token OAuth ricevuto:", oauthToken);
           }).catch(error => {
-              console.error("Errore di autenticazione:", error);
+              console.error("❌ Errore di autenticazione:", error);
           });
+        } else {
+          console.warn("⚠ auth2 non è ancora caricato");
         }
       }
 
       function openFolderPicker() {
-        if (!pickerApiLoaded || !oauthToken || !config.DEVELOPER_KEY) {
-          alert("⚠ Attendere il caricamento dell'API o effettuare l'accesso.");
+        if (!pickerApiLoaded) {
+          alert("⚠ Attendere il caricamento dell'API di Google Picker.");
+          return;
+        }
+        if (!auth2Loaded || !oauthToken) {
+          alert("⚠ Effettuare l'accesso prima di selezionare una cartella.");
+          signInUser();
+          return;
+        }
+        if (!config.DEVELOPER_KEY) {
+          alert("⚠ La chiave API non è disponibile. Riprovare più tardi.");
           return;
         }
 
