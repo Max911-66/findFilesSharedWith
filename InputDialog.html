@@ -5,29 +5,34 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
       let pickerApiLoaded = false;
+      let auth2Loaded = false;
       let oauthToken = null;
       let config = {};
 
       function onApiLoad() {
-        gapi.load('auth2', function() {
-            gapi.auth2.init({client_id: config.CLIENT_ID});
-        });
-        
-        gapi.load('picker', function() {
-            pickerApiLoaded = true;
-        });
-
         google.script.run.withSuccessHandler((cfg) => {
             config = cfg;
+            gapi.load('auth2', function() {
+                gapi.auth2.init({client_id: config.CLIENT_ID}).then(() => {
+                    auth2Loaded = true;
+                    signInUser();
+                });
+            });
+            gapi.load('picker', function() {
+                pickerApiLoaded = true;
+            });
         }).getPickerConfig();
       }
 
-      function onAuthApiLoad() {
-        google.script.run
-          .withSuccessHandler((token) => {
-            oauthToken = token;
-          })
-          .getOAuthToken();
+      function signInUser() {
+        if (auth2Loaded) {
+          let authInstance = gapi.auth2.getAuthInstance();
+          authInstance.signIn().then(user => {
+              oauthToken = user.getAuthResponse().access_token;
+          }).catch(error => {
+              console.error("Errore di autenticazione:", error);
+          });
+        }
       }
 
       function openFolderPicker() {
@@ -54,7 +59,7 @@
       function folderSelected(data) {
         if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
           const folder = data[google.picker.Response.DOCUMENTS][0];
-          document.getElementById("folderUrl").value = folder.id; // Salviamo solo l'ID
+          document.getElementById("folderUrl").value = folder.id;
           document.getElementById("folderName").innerText = "📁 Selezionato: " + folder.name;
         }
       }
