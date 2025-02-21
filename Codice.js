@@ -240,6 +240,16 @@ function getWebAppExecUrl() {
   return PropertiesService.getScriptProperties().getProperty("WEB_APP_URL");
 }
 
+function setPickerConfig() {
+  var properties = PropertiesService.getScriptProperties();
+  properties.setProperties({
+      "DEVELOPER_KEY": "AIzaSyDhv0r-LQTELQKDThW-I8lY1qEn5hPAnNs",
+      "CLIENT_ID": "779738011216-thtj1fd1uaurbrj2l4afd363chjoicdp.apps.googleusercontent.com",
+      "APP_ID": "findfilessharedwith-api"
+  });
+  Logger.log("✅ Configurazione salvata correttamente.");
+}
+
 function getOAuthToken() {
   var token = ScriptApp.getOAuthToken();
   Logger.log("OAuth Token: " + token); // 🔹 Controlla nei log
@@ -247,9 +257,16 @@ function getOAuthToken() {
 }
 
 function getPickerConfig() {
-  return {
-      DEVELOPER_KEY: PropertiesService.getScriptProperties().getProperty("DEVELOPER_KEY"),
-      CLIENT_ID: PropertiesService.getScriptProperties().getProperty("CLIENT_ID"),
-      APP_ID: PropertiesService.getScriptProperties().getProperty("APP_ID")
+  var properties = PropertiesService.getScriptProperties();
+  var config = {
+      DEVELOPER_KEY: properties.getProperty("DEVELOPER_KEY"),
+      CLIENT_ID: properties.getProperty("CLIENT_ID"),
+      APP_ID: properties.getProperty("APP_ID")
   };
+  
+  if (!config.CLIENT_ID) {
+      Logger.log("❌ Errore: CLIENT_ID non trovato nelle proprietà dello script.");
+  }
+  
+  return config;
 }
