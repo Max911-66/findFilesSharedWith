@@ -19,10 +19,7 @@
             console.log("✅ Configurazione caricata:", config);
             
             gapi.load('auth2', function() {
-                if (!config.CLIENT_ID) {
-                    console.error("❌ CLIENT_ID mancante, impossibile inizializzare auth2.");
-                    return;
-                }
+                console.log("🔄 Caricamento Auth2...");
                 gapi.auth2.init({client_id: config.CLIENT_ID}).then(() => {
                     auth2Loaded = true;
                     console.log("✅ Google Auth2 caricato");
@@ -41,12 +38,17 @@
 
       function signInUser() {
         if (!auth2Loaded) {
-          console.warn("⚠ auth2 non è ancora caricato, riprovo tra 500ms...");
-          setTimeout(signInUser, 500);
+          console.warn("⚠ auth2 non è ancora caricato, riprovo tra 1000ms...");
+          setTimeout(signInUser, 1000);
           return;
         }
         
         let authInstance = gapi.auth2.getAuthInstance();
+        if (!authInstance) {
+          console.error("❌ Errore: authInstance è null. Verifica il CLIENT_ID.");
+          return;
+        }
+        
         authInstance.signIn().then(user => {
             oauthToken = user.getAuthResponse().access_token;
             console.log("✅ Token OAuth ricevuto:", oauthToken);
