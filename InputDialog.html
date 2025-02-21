@@ -13,13 +13,17 @@
         google.script.run.withSuccessHandler((cfg) => {
             config = cfg;
             console.log("✅ Configurazione caricata:", config);
+            
             gapi.load('auth2', function() {
                 gapi.auth2.init({client_id: config.CLIENT_ID}).then(() => {
                     auth2Loaded = true;
                     console.log("✅ Google Auth2 caricato");
                     signInUser();
+                }).catch(error => {
+                    console.error("❌ Errore durante l'inizializzazione di Auth2:", error);
                 });
             });
+            
             gapi.load('picker', function() {
                 pickerApiLoaded = true;
                 console.log("✅ Google Picker API caricata");
@@ -28,17 +32,19 @@
       }
 
       function signInUser() {
-        if (auth2Loaded) {
-          let authInstance = gapi.auth2.getAuthInstance();
-          authInstance.signIn().then(user => {
-              oauthToken = user.getAuthResponse().access_token;
-              console.log("✅ Token OAuth ricevuto:", oauthToken);
-          }).catch(error => {
-              console.error("❌ Errore di autenticazione:", error);
-          });
-        } else {
-          console.warn("⚠ auth2 non è ancora caricato");
+        if (!auth2Loaded) {
+          console.warn("⚠ auth2 non è ancora caricato, riprovo tra 500ms...");
+          setTimeout(signInUser, 500);
+          return;
         }
+        
+        let authInstance = gapi.auth2.getAuthInstance();
+        authInstance.signIn().then(user => {
+            oauthToken = user.getAuthResponse().access_token;
+            console.log("✅ Token OAuth ricevuto:", oauthToken);
+        }).catch(error => {
+            console.error("❌ Errore di autenticazione:", error);
+        });
       }
 
       function openFolderPicker() {
