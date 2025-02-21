@@ -270,3 +270,8 @@ function getPickerConfig() {
   
   return config;
 }
+
+function testGetPickerConfig() {
+  var properties = PropertiesService.getScriptProperties();
+  Logger.log("CLIENT_ID: " + properties.getProperty("CLIENT_ID"));
+}
