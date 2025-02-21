@@ -241,5 +241,7 @@ function getWebAppExecUrl() {
 }
 
 function getOAuthToken() {
-  return ScriptApp.getOAuthToken();
+  var token = ScriptApp.getOAuthToken();
+  Logger.log("OAuth Token: " + token); // 🔹 Controlla nei log
+  return token;
 }
