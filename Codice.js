@@ -239,3 +239,7 @@ function showInputDialog() {
 function getWebAppExecUrl() {
   return PropertiesService.getScriptProperties().getProperty("WEB_APP_URL");
 }
+
+function getOAuthToken() {
+  return ScriptApp.getOAuthToken();
+}
